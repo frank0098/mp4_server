@@ -140,19 +140,38 @@ userRoute.options(function(req, res){
 userdetailRoute.delete(function(req,res){
   var userid=req.params.userid;
   if(userid.match(/^[0-9a-fA-F]{24}$/)){
-    UserSchema.remove({"_id":userid},function(err,user){
+    UserSchema.find({"_id":userid},function(err,user){
       if(err){
-        res.status(500);
-        res.json({"message":"Internal Error","data":[]});
+        res.status(404);
+            res.json({"message":"User Not Found","data":[]});
       }
       else{
-        res.status(200);
-        res.json({
-        "message": "User Deleted",
-        "data": []})
+        if(user.length!=0){
+          UserSchema.remove({"_id":userid},function(err,user){
+          if(err){
+            res.status(500);
+            res.json({"message":"Internal Error","data":[]});
+          }
+          else{
+            res.status(200);
+            res.json({
+            "message": "User Deleted",
+            "data": []})
+
+          }
+        })
+
+        }
+        else{
+          res.status(404);
+          res.json({"message":"User Not Found","data":[]});
+        }
+        
 
       }
     })
+
+    
 
   }
   else{
@@ -423,19 +442,37 @@ taskdetailRoute.put(function(req, res, next){
 taskdetailRoute.delete(function(req,res){
   var taskid=req.params.taskid;
   if(taskid.match(/^[0-9a-fA-F]{24}$/)){
-    TaskSchema.remove({"_id":taskid},function(err,task){
+    TaskSchema.find({"_id":taskid},function(err,task){
       if(err){
-        res.status(500);
-        res.json({"message":"Internal Error","data":[]});
+        res.status(404);
+        res.json({"message":"Task Not Found","data":[]});
       }
       else{
-        res.status(200);
-        res.json({
-        "message": "Task Deleted",
-        "data": []})
+        if(task.length!=0){
+          TaskSchema.remove({"_id":taskid},function(err,task){
+          if(err){
+            res.status(500);
+            res.json({"message":"Internal Error","data":[]});
+          }
+          else{
+            res.status(200);
+            res.json({
+            "message": "Task Deleted",
+            "data": []})
+
+          }
+        })
+
+        }
+        else{
+          res.status(404);
+          res.json({"message":"Task Not Found","data":[]});
+        }
+        
 
       }
     })
+    
 
   }
   else{
