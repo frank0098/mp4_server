@@ -60,17 +60,17 @@ userRoute.get(function(req,res){
   var limit=100000;
   var count=false;
   if(req.query.where!=undefined)
-  where=req.query.where;
+    where=JSON.parse(req.query.where);
   if(req.query.sort!=undefined)
-  sort=req.query.sort;
+    sort=JSON.parse(req.query.sort);
   if(req.query.select!=undefined)
-  select=req.query.select;
+    select=JSON.parse(req.query.select);
   if(req.query.skip!=undefined)
-  skip=req.query.skip;
+    skip=req.query.skip;
   if(req.query.limit!=undefined)
-  limit=req.query.limit;
+    limit=req.query.limit;
   if(req.query.count!=undefined)
-  count=req.query.count;
+    count=req.query.count;
 
 	UserSchema.find(where,select,function(err,users){
 		if(err)
@@ -182,7 +182,18 @@ userdetailRoute.put(function(req, res, next){
                 if(err)
                   res.json({"message":err,"data":[]});
                 if(user.length!=0)
-                  res.json({"message":"OK","data":user});
+                  {
+                    UserSchema.find({"_id":userid},function(err,retdata){
+                      if(err){
+                        res.status(404);
+                        res.json({"message":"User Not Found","data":[]});
+                      }
+                      else{
+
+                          res.json({"message":"OK","data":retdata});
+                      }
+                    })
+                  }
                 else{
                   res.status(404);
                   res.json({"message":"User Not Found","data":[]});
@@ -245,17 +256,17 @@ taskRoute.get(function(req,res){
   var limit=100;
   var count=false;
   if(req.query.where!=undefined)
-  where=req.query.where;
+    where=JSON.parse(req.query.where);
   if(req.query.sort!=undefined)
-  sort=req.query.sort;
+    sort=JSON.parse(req.query.sort);
   if(req.query.select!=undefined)
-  select=req.query.select;
+    select=JSON.parse(req.query.select);
   if(req.query.skip!=undefined)
-  skip=req.query.skip;
+    skip=req.query.skip;
   if(req.query.limit!=undefined)
-  limit=req.query.limit;
+    limit=req.query.limit;
   if(req.query.count!=undefined)
-  count=req.query.count;
+    count=req.query.count;
   TaskSchema.find(where,select,function(err,users){
     if(err)
       {
@@ -380,8 +391,17 @@ taskdetailRoute.put(function(req, res, next){
         TaskSchema.update({"_id":taskid},{$set:task_data},function(err,task){
         if(err)
           res.json({"message":err,"data":[]});
-        if(task.length!=0)
-          res.json({"message":"OK","data":task});
+        if(task.length!=0){
+            TaskSchema.find({_id:taskid},function(err,task){
+              if(err){
+                res.json({"message":err,"data":[]});
+              }
+              else{
+                res.json({"message":"OK","data":task});
+              }
+            })
+
+          }
         else{
           res.status(404);
           res.json({"message":"Task Not Found","data":[]});
