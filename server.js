@@ -15,7 +15,7 @@ mongoose.connect('mongodb://username:password@ds055495.mlab.com:55495/webmp4');
 var app = express();
 
 // Use environment defined port or 4000
-var port = process.env.PORT || 3000;
+var port = process.env.PORT || 4000;
 
 //Allow CORS so that backend and frontend could pe put on different servers
 var allowCrossDomain = function(req, res, next) {
