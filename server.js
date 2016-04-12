@@ -15,7 +15,7 @@ mongoose.connect('mongodb://username:password@ds055495.mlab.com:55495/webmp4');
 var app = express();
 
 // Use environment defined port or 4000
-var port = process.env.PORT || 4000;
+var port = process.env.PORT || 3000;
 
 //Allow CORS so that backend and frontend could pe put on different servers
 var allowCrossDomain = function(req, res, next) {
@@ -96,38 +96,47 @@ userRoute.get(function(req,res){
 
 
 userRoute.post(function(req, res, next) {
-  var user_data = {name:req.body.name,email:req.body.email,pendingTasks:[]};
-  var new_user=new UserSchema(user_data);
-
-  UserSchema.count({email:req.body.email},function(err,count){
-    if(!count){
-      new_user.save(function (err, post) {
-      if (err) {
-        var errors=err.errors;
-        var errarray=[];
-        for(x in errors){
-          errarray.push(errors[x].message);
-        }
-        res.status(500);
+  if(req.body.name==undefined || req.body.email==undefined){
+      res.status(500);
         res.json({
-      "message": errarray.join(),
-      "data": []})
+        "message": "Validation Error: Email or name is missing! ",
+        "data": []})
+  }
+  else{
+    var user_data = {name:req.body.name,email:req.body.email,pendingTasks:[]};
+    var new_user=new UserSchema(user_data);
+
+    UserSchema.count({email:req.body.email},function(err,count){
+      if(!count){
+        new_user.save(function (err, post) {
+        if (err) {
+          var errors=err.errors;
+          var errarray=[];
+          for(x in errors){
+            errarray.push(errors[x].message);
+          }
+          res.status(500);
+          res.json({
+        "message": errarray.join(),
+        "data": []})
+        }
+        else{
+          res.status(201);
+          res.json({
+        "message": "User Created",
+        "data": post})
+        }
+      });
       }
       else{
-        res.status(201);
+        res.status(500);
         res.json({
-      "message": "User Created",
-      "data": post})
+        "message": "Email already Exists",
+        "data": []})
       }
-    });
-    }
-    else{
-      res.status(500);
-      res.json({
-      "message": "Email already Exists",
-      "data": []})
-    }
-  })
+    })
+  }
+  
 
   
 });
@@ -315,40 +324,51 @@ taskRoute.options(function(req, res){
 
 
 taskRoute.post(function(req, res, next) {
-  var assigneduser = "";
-  if(req.body.assignedUserName=="" || req.body.assignedUserName==null)
-    assigneduser="unassigned"
-  else
-    assigneduser=req.body.assignedUserName;
 
-  var task_data = {name:req.body.name,
-    description:req.body.description,
-    deadline:req.body.deadline,
-    completed:req.body.completed,
-    assignedUser:req.body.assignedUser,
-    assignedUserName:req.body.assignedUserName};
-
-  var new_task=new TaskSchema(task_data);
-
-  new_task.save(function (err, post) {
-      if (err) {
-        var errors=err.errors;
-        var errarray=[];
-        for(x in errors){
-          errarray.push(errors[x].message);
-        }
-        res.status(500);
+  if(req.body.name==undefined || req.body.deadline==undefined){
+      res.status(500);
         res.json({
-      "message": errarray.join(),
-      "data": []})
-      }
-      else{
-        res.status(201);
-        res.json({
-      "message": "Task Created",
-      "data": post})
-      }
-    });
+        "message": "Validation Error: name or deadline is missing! ",
+        "data": []})
+  }
+  else{
+     var assigneduser = "";
+      if(req.body.assignedUserName=="" || req.body.assignedUserName==null)
+        assigneduser="unassigned"
+      else
+        assigneduser=req.body.assignedUserName;
+
+      var task_data = {name:req.body.name,
+        description:req.body.description,
+        deadline:req.body.deadline,
+        completed:req.body.completed,
+        assignedUser:req.body.assignedUser,
+        assignedUserName:req.body.assignedUserName};
+
+      var new_task=new TaskSchema(task_data);
+
+      new_task.save(function (err, post) {
+          if (err) {
+            var errors=err.errors;
+            var errarray=[];
+            for(x in errors){
+              errarray.push(errors[x].message);
+            }
+            res.status(500);
+            res.json({
+          "message": errarray.join(),
+          "data": []})
+          }
+          else{
+            res.status(201);
+            res.json({
+          "message": "Task Created",
+          "data": post})
+          }
+        });
+
+  }
+ 
 
 
   
@@ -493,50 +513,5 @@ app.listen(port);
 console.log('Server running on port ' + port);
 
 
-// var llama = new Llama();
- 
-// llama.name = req.body.name;
-// llama.height = req.body.height;
- 
-// llama.save(function(err) {
-//      If (err)
-//          res.send(err);
- 
-//      res.json({ message: ‘llama added to database’, data:llama });
-//     });
-// });
 
-
-
-// llamaRoute.get(function(req, res) {
-//   res.json([{ "name": "alice", "height": 12 }, { "name": "jane", "height": 13 }]);
-// });
-
-
-// app.get('/api/llamas',function(err,res){
-// 	res.json([{ "name": "alice", "height": 12 }, { "name": "jane", "height": 13 }]);
-// })
-
-// Todo.find(function(err, todos) {
-
-//             // if there is an error retrieving, send the error. nothing after res.send(err) will execute
-//             if (err)
-//                 res.send(err)
-
-//             res.json(todos); // return all todos in JSON format
-//         });
-
-// userRoute.post(function(req,res){
-//  UserSchema.create({
-//    name:req.body.name
-//  },function(err,user){
-//      if(err)
-//        res.send(err);
-//      User.find(function(err,users){
-//        if(err)
-//          res.send(err);
-//        res.json(users);
-//      })
-//    })
-// });
 
